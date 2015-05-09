@@ -114,12 +114,14 @@ Function *GenEmptyFunction(Module *M) {
   LLVMContext &Context = M->getContext();
   ArgsTy.push_back(PointerType::get(IntegerType::getInt1Ty(Context), 0));
   ArgsTy.push_back(PointerType::get(IntegerType::getInt8Ty(Context), 0));
+  ArgsTy.push_back(PointerType::get(IntegerType::getInt16Ty(Context), 0));
   ArgsTy.push_back(PointerType::get(IntegerType::getInt32Ty(Context), 0));
   ArgsTy.push_back(PointerType::get(IntegerType::getInt64Ty(Context), 0));
+  ArgsTy.push_back(IntegerType::getInt1Ty(Context));
+  ArgsTy.push_back(IntegerType::getInt8Ty(Context));
+  ArgsTy.push_back(IntegerType::getInt16Ty(Context));
   ArgsTy.push_back(IntegerType::getInt32Ty(Context));
   ArgsTy.push_back(IntegerType::getInt64Ty(Context));
-  ArgsTy.push_back(IntegerType::getInt8Ty(Context));
-  ArgsTy.push_back(IntegerType::getInt1Ty(Context));
 
   FunctionType *FuncTy = FunctionType::get(Type::getVoidTy(Context), ArgsTy, 0);
   // Pick a unique name to describe the input parameters
