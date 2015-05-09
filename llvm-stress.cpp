@@ -156,11 +156,11 @@ protected:
 
   Constant *getRandomConstant(Type *Tp) {
     if (Tp->isIntegerTy()) {
-      if (Ran->Rand() & 1)
+      if (Ran->FlipCoin())
         return ConstantInt::getAllOnesValue(Tp);
       return ConstantInt::getNullValue(Tp);
     } else if (Tp->isFloatingPointTy()) {
-      if (Ran->Rand() & 1)
+      if (Ran->FlipCoin())
         return ConstantFP::getAllOnesValue(Tp);
       return ConstantFP::getNullValue(Tp);
     }
@@ -178,11 +178,11 @@ protected:
 
     // If the requested type was not found, generate a constant value.
     if (Tp->isIntegerTy()) {
-      if (Ran->Rand() & 1)
+      if (Ran->FlipCoin())
         return ConstantInt::getAllOnesValue(Tp);
       return ConstantInt::getNullValue(Tp);
     } else if (Tp->isFloatingPointTy()) {
-      if (Ran->Rand() & 1)
+      if (Ran->FlipCoin())
         return ConstantFP::getAllOnesValue(Tp);
       return ConstantFP::getNullValue(Tp);
     } else if (Tp->isVectorTy()) {
@@ -224,7 +224,7 @@ protected:
 
   /// Pick a random type.
   Type *pickType() {
-    return (Ran->Rand() & 1 ? pickVectorType() : pickScalarType());
+    return (Ran->FlipCoin() ? pickVectorType() : pickScalarType());
   }
 
   /// Pick a random pointer type.
@@ -403,7 +403,7 @@ struct ConstModifier: public Modifier {
       APInt RandomInt(Ty->getPrimitiveSizeInBits(), makeArrayRef(RandomBits));
       APFloat RandomFloat(Ty->getFltSemantics(), RandomInt);
 
-      if (Ran->Rand() & 1)
+      if (Ran->FlipCoin())
         return PT->push_back(ConstantFP::getNullValue(Ty));
       return PT->push_back(ConstantFP::get(Ty->getContext(), RandomFloat));
     }
@@ -521,7 +521,7 @@ struct CastModifier: public Modifier {
     unsigned DestSize = DestTy->getScalarType()->getPrimitiveSizeInBits();
 
     // Generate lots of bitcasts.
-    if ((Ran->Rand() & 1) && VSize == DestSize) {
+    if ((Ran->FlipCoin()) && VSize == DestSize) {
       return PT->push_back(
         new BitCastInst(V, DestTy, "BC", BB->getTerminator()));
     }
@@ -534,7 +534,7 @@ struct CastModifier: public Modifier {
           new TruncInst(V, DestTy, "Tr", BB->getTerminator()));
       } else {
         assert(VSize < DestSize && "Different int types with the same size?");
-        if (Ran->Rand() & 1)
+        if (Ran->FlipCoin())
           return PT->push_back(
             new ZExtInst(V, DestTy, "ZE", BB->getTerminator()));
         return PT->push_back(new SExtInst(V, DestTy, "Se", BB->getTerminator()));
@@ -544,7 +544,7 @@ struct CastModifier: public Modifier {
     // Fp to int.
     if (VTy->getScalarType()->isFloatingPointTy() &&
         DestTy->getScalarType()->isIntegerTy()) {
-      if (Ran->Rand() & 1)
+      if (Ran->FlipCoin())
         return PT->push_back(
           new FPToSIInst(V, DestTy, "FC", BB->getTerminator()));
       return PT->push_back(new FPToUIInst(V, DestTy, "FC", BB->getTerminator()));
@@ -553,7 +553,7 @@ struct CastModifier: public Modifier {
     // Int to fp.
     if (VTy->getScalarType()->isIntegerTy() &&
         DestTy->getScalarType()->isFloatingPointTy()) {
-      if (Ran->Rand() & 1)
+      if (Ran->FlipCoin())
         return PT->push_back(
           new SIToFPInst(V, DestTy, "FC", BB->getTerminator()));
       return PT->push_back(new UIToFPInst(V, DestTy, "FC", BB->getTerminator()));
@@ -590,7 +590,7 @@ struct SelectModifier: public Modifier {
 
       // If the value type is a vector, and we allow vector select, then in 50%
       // of the cases generate a vector select.
-      if (Val0->getType()->isVectorTy() && (Ran->Rand() % 1)) {
+      if (Val0->getType()->isVectorTy() && (Ran->FlipCoin())) {
         unsigned NumElem = cast<VectorType>(Val0->getType())->getNumElements();
         CondTy = VectorType::get(CondTy, NumElem);
       }
