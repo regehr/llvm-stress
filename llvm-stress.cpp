@@ -53,6 +53,9 @@ static cl::opt<bool> GenPPCFP128("generate-ppc-fp128",
 static cl::opt<bool> GenX86MMX("generate-x86-mmx",
   cl::desc("Generate X86 MMX floating-point values"), cl::init(false));
 
+static cl::opt<bool> GenUB("generate-ub-flags",
+  cl::desc("Generate nsw/nuw/exact flags"), cl::init(true));
+
 namespace {
 /// A utility class to provide a pseudo-random number generator which is
 /// the same across all platforms. This is somewhat close to the libc
@@ -88,6 +91,10 @@ public:
   /// Rand operator for STL algorithms.
   ptrdiff_t operator()(ptrdiff_t y) {
     return  Rand64() % y;
+  }
+
+  bool FlipCoin() {
+    return Rand() > (0x7ffff / 2);
   }
 
 private:
@@ -354,7 +361,20 @@ struct BinModifier: public Modifier {
     case 12:{Op = Instruction::Xor;  break; }
     }
 
-    PT->push_back(BinaryOperator::Create(Op, Val0, Val1, "B", Term));
+    llvm::BinaryOperator *I = BinaryOperator::Create(Op, Val0, Val1, "B", Term);
+    if (GenUB && Ran->FlipCoin() &&
+        (Op == Instruction::Add || Op == Instruction::Sub ||
+         Op == Instruction::Mul || Op == Instruction::Shl))
+      I->setHasNoSignedWrap (true);
+    if (GenUB && Ran->FlipCoin() &&
+        (Op == Instruction::Add || Op == Instruction::Sub ||
+         Op == Instruction::Mul || Op == Instruction::Shl))
+      I->setHasNoUnsignedWrap (true);
+    if (GenUB && Ran->FlipCoin() &&
+        (Op == Instruction::UDiv || Op == Instruction::SDiv ||
+         Op == Instruction::LShr ||Op == Instruction::AShr))
+      I->setIsExact (true);
+    PT->push_back(I);
   }
 };
 
