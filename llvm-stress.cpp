@@ -55,6 +55,9 @@ static cl::opt<bool> GenPPCFP128("generate-ppc-fp128",
 static cl::opt<bool> GenX86MMX("generate-x86-mmx",
   cl::desc("Generate X86 MMX floating-point values"), cl::init(false));
 
+static cl::opt<bool> GenVecs("generate-vectors",
+  cl::desc("Generate vector code"), cl::init(true));
+
 static cl::opt<bool> GenUB("generate-ub-flags",
   cl::desc("Generate nsw/nuw/exact flags"), cl::init(true));
 
@@ -226,7 +229,8 @@ protected:
 
   /// Pick a random type.
   Type *pickType() {
-    return (Ran->FlipCoin() ? pickVectorType() : pickScalarType());
+    return ((GenVecs ? Ran->FlipCoin() : false)
+            ? pickVectorType() : pickScalarType());
   }
 
   /// Pick a random pointer type.
@@ -660,9 +664,11 @@ static void FillFunction(Function *F, Random &R) {
   std::unique_ptr<Modifier> PM(new CmpModifier(BB, &PT, &R));
   Modifiers.push_back(LM.get());
   Modifiers.push_back(SM.get());
-  Modifiers.push_back(EE.get());
-  Modifiers.push_back(SHM.get());
-  Modifiers.push_back(IE.get());
+  if (GenVecs) {
+    Modifiers.push_back(EE.get());
+    Modifiers.push_back(SHM.get());
+    Modifiers.push_back(IE.get());
+  }
   Modifiers.push_back(BM.get());
   Modifiers.push_back(CM.get());
   Modifiers.push_back(SLM.get());
