@@ -387,11 +387,12 @@ struct ConstModifier: public Modifier {
     Type *Ty = pickType();
 
     if (Ty->isVectorTy()) {
-      switch (Ran->Rand() % 2) {
-      case 0: if (Ty->getScalarType()->isIntegerTy())
-                return PT->push_back(ConstantVector::getAllOnesValue(Ty));
-      case 1: if (Ty->getScalarType()->isIntegerTy())
-                return PT->push_back(ConstantVector::getNullValue(Ty));
+      if (Ran->FlipCoin()) {
+        if (Ty->getScalarType()->isIntegerTy())
+          return PT->push_back(ConstantVector::getAllOnesValue(Ty));
+      } else {
+        if (Ty->getScalarType()->isIntegerTy())
+          return PT->push_back(ConstantVector::getNullValue(Ty));
       }
     }
 
