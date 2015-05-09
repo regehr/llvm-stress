@@ -42,6 +42,8 @@ static cl::opt<std::string>
 OutputFilename("o", cl::desc("Override output filename"),
                cl::value_desc("filename"));
 
+static cl::opt<bool> GenFP("generate-fp",
+  cl::desc("Generate floating point code"), cl::init(true));
 static cl::opt<bool> GenHalfFloat("generate-half-float",
   cl::desc("Generate half-length floating-point values"), cl::init(false));
 static cl::opt<bool> GenX86FP80("generate-x86-fp80",
@@ -255,18 +257,18 @@ protected:
   Type *pickScalarType() {
     Type *t = nullptr;
     do {
-      switch (Ran->Rand() % 30) {
+      switch (Ran->Rand() % (GenFP ? 30 : 9)) {
       case 0: t = Type::getInt1Ty(Context); break;
       case 1: t = Type::getInt8Ty(Context); break;
       case 2: t = Type::getInt16Ty(Context); break;
       case 3: case 4:
-      case 5: t = Type::getFloatTy(Context); break;
+      case 5: t = Type::getInt32Ty(Context); break;
       case 6: case 7:
-      case 8: t = Type::getDoubleTy(Context); break;
+      case 8: t = Type::getInt64Ty(Context); break;
       case 9: case 10:
-      case 11: t = Type::getInt32Ty(Context); break;
+      case 11: t = Type::getFloatTy(Context); break;
       case 12: case 13:
-      case 14: t = Type::getInt64Ty(Context); break;
+      case 14: t = Type::getDoubleTy(Context); break;
       case 15: case 16:
       case 17: if (GenHalfFloat) t = Type::getHalfTy(Context); break;
       case 18: case 19:
