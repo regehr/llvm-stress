@@ -34,7 +34,7 @@
 using namespace llvm;
 
 static cl::opt<unsigned> SeedCL("seed",
-  cl::desc("Seed used for randomness"), cl::init(0));
+  cl::desc("Seed used for randomness"), cl::init(time(NULL)));
 static cl::opt<unsigned> SizeCL("size",
   cl::desc("The estimated size of the generated function (# of instrs)"),
   cl::init(100));
