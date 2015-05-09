@@ -1,0 +1,5 @@
+- generate intrinsics
+- generate phi
+- support bounded exhaustive generation
+- use the arguments passed to the function
+- return something
