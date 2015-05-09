@@ -1,5 +1,8 @@
 - generate intrinsics
-- generate phi
-- support bounded exhaustive generation
+- generate phis
+- make getRandomValue() better
+- support bounded exhaustive generation -- first replace the "generate and
+   shuffle" strategy wtih real bottom-up random generation
 - use the arguments passed to the function
 - return something
+- try to generate valid IR to support differential testing?
